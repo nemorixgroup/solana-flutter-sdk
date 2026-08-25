@@ -19,6 +19,8 @@ Built to be an **open, payments-focused Solana SDK**: Solana Pay
 (Solana's native recurring-payment primitive), built entirely from
 official specs; no dependency on third-party Solana Dart packages.
 
+**solana_flutter_sdk** published on pub.dev [here](https://pub.dev/packages/solana_flutter_sdk)  
+
 ## Roadmap (v1.0.0)
 
 | Phase | Focus | Version | Status |
