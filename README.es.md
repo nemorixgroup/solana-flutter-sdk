@@ -2,7 +2,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-teal.svg)](https://dart.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![CI](https://github.com/nemorixgroup/solana-flutter-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/actions)
-[![Status](https://img.shields.io/badge/Status-Scaffold-lightgrey.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/blob/main)
+[![Status](https://img.shields.io/badge/Status-Phase_1_In_Progress-blue.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/blob/main)
 
 [English](README.md) | **Español**
 
@@ -11,8 +11,8 @@
 Un SDK nativo de Flutter/Dart para pagos en Solana.
 Pure Dart · Sin platform channels · Apache 2.0 · pub.dev
 
-> **Estado: esqueleto de repositorio.** Todavía sin implementación -
-> la Fase 1 (Fundamentos Criptográficos) comienza a continuación.
+> **Estado: Fase 1 en progreso.** Ver
+> [CHANGELOG.md](CHANGELOG.md) para más detalles.
 
 Construido para ser un **SDK de Solana abierto y enfocado en
 pagos**: Solana Pay (Transfer & Transaction Requests) y
@@ -20,11 +20,13 @@ Subscriptions & Allowances (la primitiva nativa de pagos recurrentes
 de Solana), construido enteramente desde las specs oficiales; sin
 dependencia de paquetes Dart de terceros para Solana.
 
+**solana_flutter_sdk** publicado en pub.dev [aquí](https://pub.dev/packages/solana_flutter_sdk)
+
 ## Roadmap (v1.0.0)
 
 | Fase | Enfoque | Versión | Estado |
 |------|---------|---------|--------|
-| 1 | Fundamentos criptográficos (Ed25519) | `0.1.0-dev` | ⏳ Planeado |
+| 1 | Fundamentos criptográficos (Ed25519) | `0.1.0-dev` | 🔄 En progreso |
 | 2 | Direcciones y encoding (Base58, PDA, ATA) | `0.2.0-dev` | ⏳ Planeado |
 | 3 | Capa de conexión RPC (HTTP + WebSocket) | `0.3.0-dev` | ⏳ Planeado |
 | 4 | Construcción y firma de transacciones (legacy + v0) | `0.4.0-dev` | ⏳ Planeado |
@@ -42,7 +44,7 @@ Lookup Tables.
 
 ## Documentacion y Knowledge Base
 
-Este SDK esta construido sobre la [Solana Knowledge Base](https://github.com/nemorixgroup/Solana-Knowledge-Base), una guia detallada del XRP Ledger que cubre arquitectura, transacciones RPC, Solana Pay y el ecosistema de desarrollo. Lectura
+Este SDK esta construido sobre la [Solana Knowledge Base](https://github.com/nemorixgroup/Solana-Knowledge-Base), una guia detallada de la blockchain de Solana que cubre arquitectura, transacciones RPC, Solana Pay y el ecosistema de desarrollo. Lectura
 recomendada antes de entrar a los detalles internos del SDK.
 
 Cada decisión de implementación detrás de este SDK, incluyendo la elección de bibliotecas, los estándares de codificación y la verificación con respecto a las especificaciones oficiales, está documentada en [docs-sdk/](https://github.com/nemorixgroup/Solana-Knowledge-Base/tree/main/docs-sdk).
@@ -52,7 +54,7 @@ Cada decisión de implementación detrás de este SDK, incluyendo la elección d
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.1-dev
+  solana_flutter_sdk: ^0.0.2-dev
 ```
 
 ```bash
