@@ -26,6 +26,12 @@
 //   Phase 8 - Subscriptions & Allowances: Delegations
 //   Phase 9 - Subscriptions & Allowances: Plans
 //   Phase 10 - Error handling, test suite & v1.0.0 close-out
+
+import 'phase1/keypair_generation_example.dart';
+
 Future<void> main() async {
   print('--- 0.0.1-dev: Initial repository scaffold ---');
+
+  print('\n--- 0.0.2-dev: Keypair generation ---');
+  await keypairGenerationExample();
 }

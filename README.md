@@ -2,7 +2,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.x-teal.svg)](https://dart.dev)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![CI](https://github.com/nemorixgroup/solana-flutter-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/actions)
-[![Status](https://img.shields.io/badge/Status-Scaffold-lightgrey.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/blob/main)
+[![Status](https://img.shields.io/badge/Status-Phase_1_In_Progress-blue.svg)](https://github.com/nemorixgroup/solana-flutter-sdk/blob/main)
 
 **English** | [Español](README.es.md)
 
@@ -11,15 +11,15 @@
 A native Flutter/Dart SDK for Solana payments.
 Pure Dart · No platform channels · Apache 2.0 · pub.dev
 
-> **Status: Repository scaffold.** No implementation yet - Phase 1
-> (Cryptographic Fundamentals) starts next.
+> **Status: Phase 1 in progress.** See
+> [CHANGELOG.md](CHANGELOG.md) for details.
 
 Built to be an **open, payments-focused Solana SDK**: Solana Pay
 (Transfer & Transaction Requests) and Subscriptions & Allowances
 (Solana's native recurring-payment primitive), built entirely from
 official specs; no dependency on third-party Solana Dart packages.
 
-**solana_flutter_sdk** published on pub.dev [here](https://pub.dev/packages/solana_flutter_sdk)  
+**solana_flutter_sdk** published on pub.dev [here](https://pub.dev/packages/solana_flutter_sdk)
 
 ## Roadmap (v1.0.0)
 
@@ -55,7 +55,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Solana-Knowledge-Base/
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.1-dev
+  solana_flutter_sdk: ^0.0.2-dev
 ```
 
 ```bash

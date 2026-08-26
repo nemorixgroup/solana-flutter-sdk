@@ -1,6 +1,6 @@
 name: solana_flutter_sdk
 description: "A native Flutter/Dart SDK for Solana payments. Pure Dart, no platform channels. Solana Pay and Subscriptions & Allowances, built from official specs."
-version: 0.0.1-dev
+version: 0.0.2-dev
 homepage: https://github.com/nemorixgroup/solana-flutter-sdk
 repository: https://github.com/nemorixgroup/solana-flutter-sdk
 issue_tracker: https://github.com/nemorixgroup/solana-flutter-sdk/issues
