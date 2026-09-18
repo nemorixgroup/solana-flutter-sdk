@@ -11,7 +11,8 @@
 A native Flutter/Dart SDK for Solana payments.
 Pure Dart · No platform channels · Apache 2.0 · pub.dev
 
-> **Status: Phase 1 in progress.** See
+> **Status: Early Development** - API is not stable.  
+> Phase 1 (Cryptographic fundamentals) in progress. See
 > [CHANGELOG.md](CHANGELOG.md) for details.
 
 Built to be an **open, payments-focused Solana SDK**: Solana Pay
@@ -55,11 +56,44 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Solana-Knowledge-Base/
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.2-dev
+  solana_flutter_sdk: ^0.0.3-dev
 ```
 
 ```bash
 flutter pub get
+```
+
+## Quick Start
+
+```dart
+import 'package:solana_flutter_sdk/solana_flutter_sdk.dart';
+
+// Generate a brand-new, random Ed25519 keypair. Each call produces a
+// different keypair, drawn from a cryptographically secure random
+// source.
+final keypair = await SolanaKeypair.generate();
+print(keypair.publicKey.length); // 32
+```
+
+```dart
+// Restore a keypair deterministically from a previously saved seed.
+// The same 32-byte seed always produces the same keypair, and
+// therefore the same address.
+final restored = await SolanaKeypair.fromSeed(keypair.privateKey);
+print(restored.publicKey); // same bytes as keypair.publicKey
+```
+
+```dart
+import 'dart:typed_data';
+
+// Import a keypair from Solana's 64-byte secretKey format (seed +
+// public key concatenated), the same shape used by the Solana CLI's
+// id.json and by @solana/web3.js's Keypair.secretKey.
+final secretKeyBytes = Uint8List(64)
+  ..setRange(0, 32, keypair.privateKey)
+  ..setRange(32, 64, keypair.publicKey);
+final imported = await SolanaKeypair.fromSecretKey(secretKeyBytes);
+print(imported.publicKey.length); // 32
 ```
 
 ## Contributing

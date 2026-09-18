@@ -11,8 +11,9 @@
 Un SDK nativo de Flutter/Dart para pagos en Solana.
 Pure Dart · Sin platform channels · Apache 2.0 · pub.dev
 
-> **Estado: Fase 1 en progreso.** Ver
-> [CHANGELOG.md](CHANGELOG.md) para más detalles.
+> **Estado: Desarrollo Temprano** - la API aun no es estable.  
+> Fase 1 (Cryptographic fundamentals) en progreso. Ver
+> [CHANGELOG.md](CHANGELOG.md) para mas detalles.
 
 Construido para ser un **SDK de Solana abierto y enfocado en
 pagos**: Solana Pay (Transfer & Transaction Requests) y
@@ -54,11 +55,45 @@ Cada decisión de implementación detrás de este SDK, incluyendo la elección d
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.2-dev
+  solana_flutter_sdk: ^0.0.3-dev
 ```
 
 ```bash
 flutter pub get
+```
+
+## Quick Start
+
+```dart
+import 'package:solana_flutter_sdk/solana_flutter_sdk.dart';
+
+// Genera un nuevo par de llaves Ed25519 aleatorio. Cada llamada
+// produce un par de llaves distinto, usando una fuente aleatoria
+// criptográficamente segura.
+final keypair = await SolanaKeypair.generate();
+print(keypair.publicKey.length); // 32
+```
+
+```dart
+// Restaura un par de llaves de forma determinística a partir de una
+// seed guardada previamente. La misma seed de 32 bytes siempre
+// produce el mismo par de llaves, y por lo tanto la misma dirección.
+final restored = await SolanaKeypair.fromSeed(keypair.privateKey);
+print(restored.publicKey); // mismos bytes que keypair.publicKey
+```
+
+```dart
+import 'dart:typed_data';
+
+// Importa un par de llaves desde el formato secretKey de 64 bytes de
+// Solana (seed + llave pública concatenadas), el mismo formato que
+// usa el id.json del Solana CLI y Keypair.secretKey de
+// @solana/web3.js.
+final secretKeyBytes = Uint8List(64)
+  ..setRange(0, 32, keypair.privateKey)
+  ..setRange(32, 64, keypair.publicKey);
+final imported = await SolanaKeypair.fromSecretKey(secretKeyBytes);
+print(imported.publicKey.length); // 32
 ```
 
 ## Contribuciones
