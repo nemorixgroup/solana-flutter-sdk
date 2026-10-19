@@ -56,7 +56,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Solana-Knowledge-Base/
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.3-dev
+  solana_flutter_sdk: ^0.0.4-dev
 ```
 
 ```bash
@@ -94,6 +94,20 @@ final secretKeyBytes = Uint8List(64)
   ..setRange(32, 64, keypair.publicKey);
 final imported = await SolanaKeypair.fromSecretKey(secretKeyBytes);
 print(imported.publicKey.length); // 32
+```
+
+```dart
+// Sign a message, then verify it using only the public key. This is
+// the common case, since verifying someone else's signature never
+// needs a private key.
+final message = Uint8List.fromList('Hello, Solana!'.codeUnits);
+final signature = await keypair.sign(message);
+final isValid = await SolanaKeypair.verifySignature(
+  keypair.publicKey,
+  message,
+  signature,
+);
+print(isValid); // true
 ```
 
 ## Contributing
