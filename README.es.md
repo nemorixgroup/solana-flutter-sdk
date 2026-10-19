@@ -55,7 +55,7 @@ Cada decisión de implementación detrás de este SDK, incluyendo la elección d
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.3-dev
+  solana_flutter_sdk: ^0.0.4-dev
 ```
 
 ```bash
@@ -94,6 +94,20 @@ final secretKeyBytes = Uint8List(64)
   ..setRange(32, 64, keypair.publicKey);
 final imported = await SolanaKeypair.fromSecretKey(secretKeyBytes);
 print(imported.publicKey.length); // 32
+```
+
+```dart
+// Firma un mensaje y luego verifícalo usando solo la llave pública.
+// Este es el caso común, ya que verificar la firma de otra persona
+// nunca necesita una llave privada.
+final message = Uint8List.fromList('Hello, Solana!'.codeUnits);
+final signature = await keypair.sign(message);
+final isValid = await SolanaKeypair.verifySignature(
+  keypair.publicKey,
+  message,
+  signature,
+);
+print(isValid); // true
 ```
 
 ## Contribuciones

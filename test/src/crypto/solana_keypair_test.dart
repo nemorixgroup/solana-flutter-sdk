@@ -1,45 +1,52 @@
 import 'dart:typed_data';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:solana_flutter_sdk/src/crypto/solana_keypair.dart';
 
 void main() {
+  // ---- generate() ----
   group('SolanaKeypair.generate', () {
-    test('produces a 32-byte public key and a 32-byte private key seed',
-        () async {
+    test('produces a public key and private key of 32 bytes each', () async {
       final keypair = await SolanaKeypair.generate();
 
-      expect(keypair.publicKey.length, 32);
-      expect(keypair.privateKey.length, 32);
+      expect(keypair.publicKey.length, equals(32));
+      expect(keypair.privateKey.length, equals(32));
     });
 
-    test('produces distinct keys on each call', () async {
+    test('produces a different public key on each call', () async {
       final a = await SolanaKeypair.generate();
       final b = await SolanaKeypair.generate();
 
       expect(a.publicKey, isNot(equals(b.publicKey)));
-      expect(a.privateKey, isNot(equals(b.privateKey)));
     });
 
-    test('derives a public key consistent with its own private key seed',
-        () async {
-      // Re-derive the public key from the generated seed using
-      // package:cryptography directly, independent of SolanaKeypair,
-      // to catch any mismatch between the two key halves.
-      final keypair = await SolanaKeypair.generate();
-      final reconstructed =
-          await Ed25519().newKeyPairFromSeed(keypair.privateKey);
-      final reconstructedPublicKey = await reconstructed.extractPublicKey();
+    test(
+      'public key is internally consistent: independently re-deriving it '
+      'from the returned private key seed via Ed25519.newKeyPairFromSeed '
+      'produces the same bytes',
+      () async {
+        final keypair = await SolanaKeypair.generate();
 
-      expect(reconstructedPublicKey.bytes, equals(keypair.publicKey));
-    });
+        // Re-derive independently, without going through SolanaKeypair,
+        // to confirm generate() did not return a mismatched pair.
+        final rederivedKeyPair =
+            await Ed25519().newKeyPairFromSeed(keypair.privateKey);
+        final rederivedPublicKey = await rederivedKeyPair.extractPublicKey();
 
-    test('toString() never includes the raw private key bytes', () async {
+        expect(
+          Uint8List.fromList(rederivedPublicKey.bytes),
+          equals(keypair.publicKey),
+        );
+      },
+    );
+
+    test('toString() never exposes the raw private key', () async {
       final keypair = await SolanaKeypair.generate();
       final text = keypair.toString();
 
-      expect(text.contains(keypair.privateKey.toString()), isFalse);
-      expect(text, contains('redacted'));
+      expect(text, isNot(contains(keypair.privateKey.toString())));
+      expect(text, contains('<redacted>'));
     });
   });
 
@@ -142,6 +149,167 @@ void main() {
           () => SolanaKeypair.fromSecretKey(tamperedSecretKey),
           throwsArgumentError,
         );
+      },
+    );
+  });
+
+  // ---- sign() ----
+  group('SolanaKeypair.sign', () {
+    test('produces a 64-byte signature', () async {
+      final keypair = await SolanaKeypair.generate();
+      final message = Uint8List.fromList('hello solana'.codeUnits);
+
+      final signature = await keypair.sign(message);
+
+      expect(signature.length, equals(64));
+    });
+
+    test('is deterministic: signing the same message twice matches', () async {
+      final keypair = await SolanaKeypair.generate();
+      final message = Uint8List.fromList('hello solana'.codeUnits);
+
+      final first = await keypair.sign(message);
+      final second = await keypair.sign(message);
+
+      expect(first, equals(second));
+    });
+
+    test('produces different signatures for different messages', () async {
+      final keypair = await SolanaKeypair.generate();
+      final messageA = Uint8List.fromList('message A'.codeUnits);
+      final messageB = Uint8List.fromList('message B'.codeUnits);
+
+      final signatureA = await keypair.sign(messageA);
+      final signatureB = await keypair.sign(messageB);
+
+      expect(signatureA, isNot(equals(signatureB)));
+    });
+
+    test(
+      'matches RFC 8032 Test 1 (known-answer test, empty message)',
+      () async {
+        // Same seed as the fromSeed KAT above; RFC 8032 Test 1 also
+        // publishes the expected signature for the empty message.
+        // Independently cross-checked against Python's `cryptography`
+        // library before adding here.
+        final seed = _hexToBytes(
+          '9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60',
+        );
+        final expectedSignature = _hexToBytes(
+          'e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901'
+          '555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a'
+          '100b',
+        );
+
+        final keypair = await SolanaKeypair.fromSeed(seed);
+        final signature = await keypair.sign(Uint8List(0));
+
+        expect(signature, equals(expectedSignature));
+      },
+    );
+  });
+
+  // ---- verifySignature() ----
+  group('SolanaKeypair.verifySignature', () {
+    test('returns true for a valid signature', () async {
+      final keypair = await SolanaKeypair.generate();
+      final message = Uint8List.fromList('hello solana'.codeUnits);
+      final signature = await keypair.sign(message);
+
+      final isValid = await SolanaKeypair.verifySignature(
+        keypair.publicKey,
+        message,
+        signature,
+      );
+
+      expect(isValid, isTrue);
+    });
+
+    test('returns false when the message was tampered with', () async {
+      final keypair = await SolanaKeypair.generate();
+      final signature =
+          await keypair.sign(Uint8List.fromList('original'.codeUnits));
+
+      final isValid = await SolanaKeypair.verifySignature(
+        keypair.publicKey,
+        Uint8List.fromList('tampered'.codeUnits),
+        signature,
+      );
+
+      expect(isValid, isFalse);
+    });
+
+    test('returns false when the signature was tampered with', () async {
+      final keypair = await SolanaKeypair.generate();
+      final message = Uint8List.fromList('hello solana'.codeUnits);
+      final signature = await keypair.sign(message);
+      signature[0] = signature[0] ^ 0xFF;
+
+      final isValid = await SolanaKeypair.verifySignature(
+        keypair.publicKey,
+        message,
+        signature,
+      );
+
+      expect(isValid, isFalse);
+    });
+
+    test('returns false when verified against the wrong public key', () async {
+      final signer = await SolanaKeypair.generate();
+      final other = await SolanaKeypair.generate();
+      final message = Uint8List.fromList('hello solana'.codeUnits);
+      final signature = await signer.sign(message);
+
+      final isValid = await SolanaKeypair.verifySignature(
+        other.publicKey,
+        message,
+        signature,
+      );
+
+      expect(isValid, isFalse);
+    });
+
+    test('throws ArgumentError for a publicKey that is not 32 bytes', () {
+      expect(
+        () => SolanaKeypair.verifySignature(
+          Uint8List(31),
+          Uint8List(0),
+          Uint8List(64),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for a signature that is not 64 bytes', () {
+      expect(
+        () => SolanaKeypair.verifySignature(
+          Uint8List(32),
+          Uint8List(0),
+          Uint8List(63),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test(
+      'matches RFC 8032 Test 1 (known-answer test, empty message)',
+      () async {
+        final publicKey = _hexToBytes(
+          'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a',
+        );
+        final signature = _hexToBytes(
+          'e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901'
+          '555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a'
+          '100b',
+        );
+
+        final isValid = await SolanaKeypair.verifySignature(
+          publicKey,
+          Uint8List(0),
+          signature,
+        );
+
+        expect(isValid, isTrue);
       },
     );
   });

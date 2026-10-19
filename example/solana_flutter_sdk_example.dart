@@ -29,6 +29,7 @@
 
 import 'phase1/keypair_generation_example.dart';
 import 'phase1/keypair_import_example.dart';
+import 'phase1/keypair_signing_example.dart';
 
 Future<void> main() async {
   print('--- 0.0.1-dev: Initial repository scaffold ---');
@@ -38,4 +39,7 @@ Future<void> main() async {
 
   print('\n--- 0.0.3-dev: Keypair import (fromSeed / fromSecretKey) ---');
   await keypairImportExample();
+
+  print('\n--- 0.0.4-dev: Keypair signing (sign / verifySignature) ---');
+  await keypairSigningExample();
 }

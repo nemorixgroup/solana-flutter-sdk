@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.0.4-dev
+
+Phase 1 in progress: message signing and verification via `sign` and
+`verifySignature`, completing the core Ed25519 primitives on top of
+`0.0.3-dev`'s keypair import.
+
+### Added
+
+- `SolanaKeypair.sign(Uint8List message)`: signs arbitrary bytes with
+  this keypair's private key, returning a 64-byte Ed25519 signature
+- `SolanaKeypair.verifySignature(Uint8List publicKey, Uint8List message,
+  Uint8List signature)`: static method, verifies a signature against
+  a public key alone, with no `SolanaKeypair` instance (and no
+  private key) required
+- 11 new unit tests (13 -> 24): signature length, determinism,
+  different messages producing different signatures, an RFC 8032
+  Test 1 known-answer test for both `sign` and `verifySignature`,
+  tampered-message/tampered-signature/wrong-public-key rejection, and
+  length validation for `publicKey`/`signature`
+- `example/phase1/keypair_signing_example.dart`: demonstrates `sign`
+  and `verifySignature`, including the tampered-message,
+  wrong-public-key, and invalid-input cases, wired into the main
+  example entry point
+
+### Design Decisions
+
+- `verifySignature` is a static method rather than an instance
+  method: verifying a signature only ever needs the signer's public
+  key, never a private key, and the common case is verifying someone
+  else's signature with no `SolanaKeypair` instance for it in the
+  first place
+- Both `publicKey` (32 bytes) and `signature` (64 bytes) are
+  length-validated upfront with `ArgumentError`, matching the pattern
+  already used in `fromSeed`/`fromSecretKey`
+- Extends the RFC 8032 Test 1 known-answer test from `0.0.3-dev`: the
+  same official vector also publishes the expected signature for the
+  empty message, so `sign` and `verifySignature` are both checked
+  against it, independently cross-checked with Python's
+  `cryptography` library before being added to the suite
+
+### Status
+
+Phase 1 in progress: keypair generation, import, and
+signing/verification complete and tested, including RFC 8032
+known-answer vectors for seed-to-public-key derivation and for
+signing.  
+No mnemonic or hierarchical derivation support yet.  
+Not ready for production use.  
+Next: BIP39 mnemonic support (`0.0.5-dev`).  
+
 ## 0.0.3-dev
 
 Phase 1 in progress: keypair import via `fromSeed` and `fromSecretKey`,
