@@ -6,8 +6,8 @@ import 'package:cryptography/cryptography.dart';
 ///
 /// Solana identifies every account by a 32-byte Ed25519 public key
 /// (see https://solana.com/docs/core/accounts). This class covers
-/// keypair generation and import, using
-/// [package:cryptography](https://pub.dev/packages/cryptography)'s
+/// keypair generation, import, and message signing/verification,
+/// using [package:cryptography](https://pub.dev/packages/cryptography)'s
 /// [Ed25519] implementation for every operation.
 ///
 /// The private key exposed here ([privateKey]) is always the raw 32-byte
@@ -27,6 +27,14 @@ import 'package:cryptography/cryptography.dart';
 ///
 /// // Import a keypair from a Solana CLI id.json (64-byte secretKey).
 /// final imported = await SolanaKeypair.fromSecretKey(secretKeyBytes);
+///
+/// // Sign a message, then verify it against the public key alone.
+/// final signature = await keypair.sign(messageBytes);
+/// final isValid = await SolanaKeypair.verifySignature(
+///   keypair.publicKey,
+///   messageBytes,
+///   signature,
+/// );
 /// ```
 class SolanaKeypair {
   SolanaKeypair._({
@@ -49,12 +57,15 @@ class SolanaKeypair {
   /// The Ed25519 algorithm instance used for all keypair operations.
   static final Ed25519 _algorithm = Ed25519();
 
-  /// The exact byte length of a raw Ed25519 seed/private key.
+  /// The exact byte length of a raw Ed25519 seed/private/public key.
   static const int _seedLength = 32;
 
   /// The exact byte length of Solana's concatenated `secretKey` format
   /// (32-byte seed + 32-byte public key).
   static const int _secretKeyLength = 64;
+
+  /// The exact byte length of an Ed25519 signature.
+  static const int _signatureLength = 64;
 
   /// Generates a new, random Ed25519 keypair.
   ///
@@ -149,6 +160,73 @@ class SolanaKeypair {
     }
 
     return keypair;
+  }
+
+  /// Signs [message] with this keypair's private key, producing a
+  /// 64-byte Ed25519 signature.
+  ///
+  /// Every required signer on a Solana transaction provides a
+  /// signature of this form over the serialized message
+  /// (see https://solana.com/docs/core/transactions). Building and
+  /// signing an actual Solana transaction message comes in a later
+  /// phase; this method covers the underlying Ed25519 primitive only.
+  ///
+  /// Ed25519 signing is deterministic: signing the same [message]
+  /// with the same keypair always produces the same signature, unlike
+  /// some other signature schemes.
+  Future<Uint8List> sign(Uint8List message) async {
+    // Rebuild the algorithm's key pair representation from the raw
+    // seed, since package:cryptography signs using its own KeyPair
+    // type rather than raw bytes directly.
+    final keyPair = await _algorithm.newKeyPairFromSeed(privateKey);
+
+    final signature = await _algorithm.sign(message, keyPair: keyPair);
+
+    return Uint8List.fromList(signature.bytes);
+  }
+
+  /// Verifies that [signature] is a valid Ed25519 signature of
+  /// [message], produced by the private key matching [publicKey].
+  ///
+  /// This is a static method, not an instance method, because
+  /// verifying a signature only ever needs the signer's public key,
+  /// never a private key: the common case is verifying a signature
+  /// produced by someone else's keypair, which this SDK has no
+  /// [SolanaKeypair] instance for in the first place.
+  ///
+  /// Throws [ArgumentError] if [publicKey] is not exactly 32 bytes,
+  /// or [signature] is not exactly 64 bytes.
+  static Future<bool> verifySignature(
+    Uint8List publicKey,
+    Uint8List message,
+    Uint8List signature,
+  ) async {
+    if (publicKey.length != _seedLength) {
+      throw ArgumentError.value(
+        publicKey.length,
+        'publicKey.length',
+        'Ed25519 public key must be exactly $_seedLength bytes',
+      );
+    }
+    if (signature.length != _signatureLength) {
+      throw ArgumentError.value(
+        signature.length,
+        'signature.length',
+        'Ed25519 signature must be exactly $_signatureLength bytes',
+      );
+    }
+
+    // Wrap the raw public key bytes in the type package:cryptography
+    // expects, then let it do the actual Ed25519 verification math.
+    final simplePublicKey = SimplePublicKey(
+      publicKey,
+      type: KeyPairType.ed25519,
+    );
+
+    return _algorithm.verify(
+      message,
+      signature: Signature(signature, publicKey: simplePublicKey),
+    );
   }
 
   /// Compares two byte lists for equality.
