@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.0.5-dev
+
+### Added
+- `Bip39Mnemonic` class for BIP-39 mnemonic phrase support: generate a new mnemonic, restore one from an existing phrase (with automatic checksum validation), and derive the 64-byte seed via PBKDF2-HMAC-SHA512 (2048 iterations), per the official BIP-39 specification.
+- Official BIP-39 English wordlist (2048 words) as `bip39EnglishWordlist`.
+
+### Status
+Phase 1 (Cryptographic Fundamentals) in progress. Completed so far: Ed25519 keypair generation, import (`fromSeed` / `fromSecretKey`), signing and signature verification, and BIP-39 mnemonic support (generate, validate, derive seed).
+Not ready for production use.
+Next: SLIP-0010 hierarchical key derivation (`0.0.6-dev`).
+
 ## 0.0.4-dev
 
 Phase 1 in progress: message signing and verification via `sign` and
