@@ -56,7 +56,7 @@ documented in [docs-sdk/](https://github.com/nemorixgroup/Solana-Knowledge-Base/
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.4-dev
+  solana_flutter_sdk: ^0.0.5-dev
 ```
 
 ```bash
@@ -108,6 +108,25 @@ final isValid = await SolanaKeypair.verifySignature(
   signature,
 );
 print(isValid); // true
+```
+
+### BIP-39 Mnemonic (v0.0.5-dev)
+
+Generate a new mnemonic, restore an existing one, and derive the BIP-39 seed.
+
+```dart
+import 'package:solana_flutter_sdk/src/crypto/bip39/bip39_mnemonic.dart';
+
+// Generate a new 12-word mnemonic (the same default solana-keygen uses).
+final mnemonic = await Bip39Mnemonic.generate();
+print(mnemonic.phrase);
+
+// Restore an existing mnemonic; its checksum is validated automatically.
+final restored = await Bip39Mnemonic.fromPhrase(savedPhrase);
+
+// Derive the 64-byte BIP-39 seed (optionally with a passphrase).
+final seed = await restored.toSeed();
+final seedWithPassphrase = await restored.toSeed(passphrase: 'my-passphrase');
 ```
 
 ## Contributing

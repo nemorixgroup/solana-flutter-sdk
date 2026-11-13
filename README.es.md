@@ -55,7 +55,7 @@ Cada decisión de implementación detrás de este SDK, incluyendo la elección d
 ```yaml
 # pubspec.yaml
 dependencies:
-  solana_flutter_sdk: ^0.0.4-dev
+  solana_flutter_sdk: ^0.0.5-dev
 ```
 
 ```bash
@@ -108,6 +108,25 @@ final isValid = await SolanaKeypair.verifySignature(
   signature,
 );
 print(isValid); // true
+```
+
+### Mnemónico BIP-39 (v0.0.5-dev)
+
+Genera un nuevo mnemónico, restaura uno existente, y deriva el seed BIP-39.
+
+```dart
+import 'package:solana_flutter_sdk/src/crypto/bip39/bip39_mnemonic.dart';
+
+// Genera un nuevo mnemónico de 12 palabras (el mismo valor por defecto que usa solana-keygen).
+final mnemonic = await Bip39Mnemonic.generate();
+print(mnemonic.phrase);
+
+// Restaura un mnemónico existente; su checksum se valida automáticamente.
+final restored = await Bip39Mnemonic.fromPhrase(savedPhrase);
+
+// Deriva el seed BIP-39 de 64 bytes (opcionalmente con passphrase).
+final seed = await restored.toSeed();
+final seedWithPassphrase = await restored.toSeed(passphrase: 'mi-passphrase');
 ```
 
 ## Contribuciones

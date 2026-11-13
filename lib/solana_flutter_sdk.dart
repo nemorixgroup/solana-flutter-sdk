@@ -7,4 +7,5 @@
 library;
 
 // (Cryptographic Fundamentals).
+export 'src/crypto/bip39/bip39_mnemonic.dart';
 export 'src/crypto/solana_keypair.dart';

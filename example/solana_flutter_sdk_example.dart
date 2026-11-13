@@ -27,6 +27,7 @@
 //   Phase 9 - Subscriptions & Allowances: Plans
 //   Phase 10 - Error handling, test suite & v1.0.0 close-out
 
+import 'phase1/bip39_mnemonic_example.dart';
 import 'phase1/keypair_generation_example.dart';
 import 'phase1/keypair_import_example.dart';
 import 'phase1/keypair_signing_example.dart';
@@ -42,4 +43,8 @@ Future<void> main() async {
 
   print('\n--- 0.0.4-dev: Keypair signing (sign / verifySignature) ---');
   await keypairSigningExample();
+
+  print('\n--- 0.0.5-dev: BIP-39 mnemonic (generate / fromPhrase / '
+      'toSeed) ---');
+  await bip39MnemonicExample();
 }
